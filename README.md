@@ -10,13 +10,13 @@ Les themes peuvent etre reordonnes sans perdre leurs points de grammaire. Les po
 
 ## Fonctionnalites
 
-- Programmes A0-A1, A1-A2, A2-B1 et B1-B2 initialises par defaut.
+- Programmes A0-A1, A1-A2, A2-B1, A2 vers l'emploi, B1 vers l'emploi et B1-B2 initialises par defaut.
 - A0-A1 est traite comme une progression pedagogique pre-A1 -> A1.
 - Drag-and-drop avec dnd-kit.
 - Boutons monter / descendre et select de deplacement comme fallback clavier.
 - Ajout, suppression, renommage et notes.
 - IDs stables independants des labels.
-- Recherche, compteurs, banque de points de grammaire.
+- Recherche, compteurs, banque CECRL de points de grammaire recommandes.
 - Import JSON canonique v1, migration legacy et import assiste depuis liste.
 - Export JSON, CSV, Markdown et impression navigateur.
 - Vue simple imprimable par programme, sans controles d'edition.
@@ -43,13 +43,14 @@ npm run build
 
 ## Test manuel rapide
 
-1. Ouvrir A0-A1, A1-A2, A2-B1 ou B1-B2.
+1. Ouvrir A0-A1, A1-A2, A2-B1, A2 vers l'emploi, B1 vers l'emploi ou B1-B2.
 2. Deplacer un theme par glisser-deposer ou avec Monter / Descendre.
 3. Verifier que ses points de grammaire restent dans la carte.
 4. Deplacer un point vers un autre theme avec le select "Vers...".
-5. Cliquer sur `Vue simple` dans la colonne de gauche et verifier la version imprimable.
-6. Exporter en JSON puis reimporter le fichier.
-7. Exporter en CSV et l'ouvrir dans un tableur.
+5. Dans la banque CECRL, rechercher un point et l'ajouter au theme cible.
+6. Cliquer sur `Imprimer` dans le bandeau horizontal des programmes et verifier la version imprimable.
+7. Exporter en JSON puis reimporter le fichier.
+8. Exporter en CSV et l'ouvrir dans un tableur.
 
 ## Deploiement Vercel
 

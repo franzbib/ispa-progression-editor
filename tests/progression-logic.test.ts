@@ -8,6 +8,14 @@ import { exportToMarkdown } from "@/lib/export/markdown";
 import { migrateLegacyToV1 } from "@/lib/import/legacy";
 import { mergeMissingDefaultPrograms } from "@/lib/progression/document";
 import {
+  filterRecommendations,
+  getRecommendationsForProgram,
+  getRecommendationStatus,
+  normalizeGrammarLabel,
+  themeContainsGrammarLabel
+} from "@/lib/progression/grammar-bank";
+import {
+  addGrammarPoint,
   moveGrammarPointBetweenThemes,
   renameGrammarPoint,
   renameTheme,
@@ -109,18 +117,23 @@ describe("validation and migration", () => {
     const result = migrateLegacyToV1(legacy);
 
     expect(result.success).toBe(true);
-    expect(result.doc?.programs[0].label).toBe("A2-B1 legacy");
-    expect(result.doc?.programs[0].sequence[0].grammarPoints[0].label).toBe("Subjonctif");
+    if (!result.success || !result.doc) {
+      throw new Error("La migration legacy devrait produire un document.");
+    }
+    expect(result.doc.programs[0].label).toBe("A2-B1 legacy");
+    expect(result.doc.programs[0].sequence[0].grammarPoints[0].label).toBe("Subjonctif");
     expect(result.report.issues.some((issue) => issue.level === "warning")).toBe(true);
   });
 });
 
 describe("sample progression data", () => {
-  it("contains the four default programs in the expected order", () => {
+  it("contains the six default programs in the expected order", () => {
     expect(sampleProgressionDoc.programs.map((program) => program.id)).toEqual([
       "program-a0-a1",
       "program-a1-a2",
       "program-a2-b1",
+      "program-a2-emploi",
+      "program-b1-emploi",
       "program-b1-b2"
     ]);
   });
@@ -151,9 +164,44 @@ describe("sample progression data", () => {
       "program-a0-a1",
       "program-a1-a2",
       "program-a2-b1",
+      "program-a2-emploi",
+      "program-b1-emploi",
       "program-b1-b2"
     ]);
     expect(merged.programs[2].label).toBe("A2-B1 modifié localement");
+  });
+});
+
+describe("sample employment data", () => {
+  it("contains employment-oriented programs with grammar points from the synthesis", () => {
+    const a2Employment = sampleProgressionDoc.programs.find(
+      (program) => program.id === "program-a2-emploi"
+    );
+    const b1Employment = sampleProgressionDoc.programs.find(
+      (program) => program.id === "program-b1-emploi"
+    );
+
+    expect(a2Employment).toBeDefined();
+    expect(b1Employment).toBeDefined();
+    if (!a2Employment || !b1Employment) {
+      throw new Error("Les programmes vers l'emploi devraient être présents.");
+    }
+
+    expect(a2Employment.label).toBe("A2 vers l'emploi");
+    expect(a2Employment.sequence.some((theme) => theme.themeLabel === "Monde professionnel")).toBe(
+      true
+    );
+    expect(
+      a2Employment.sequence.some((theme) =>
+        theme.grammarPoints.some((point) => point.label === "La voix passive")
+      )
+    ).toBe(true);
+    expect(b1Employment.label).toBe("B1 vers l'emploi");
+    expect(
+      b1Employment.sequence.some((theme) =>
+        theme.grammarPoints.some((point) => point.label === "Le discours indirect simple")
+      )
+    ).toBe(true);
   });
 });
 
@@ -179,6 +227,94 @@ describe("simple printable view", () => {
     expect(html).not.toContain("Supprimer");
     expect(html).not.toContain("Banque de grammaire");
     expect(html).not.toContain("::");
+  });
+});
+
+describe("CEFR grammar bank", () => {
+  it("returns recommendations for the active program", () => {
+    const recommendations = getRecommendationsForProgram("program-a1-a2");
+
+    expect(recommendations.length).toBeGreaterThanOrEqual(25);
+    expect(recommendations.some((item) => item.label === "Le futur proche")).toBe(true);
+  });
+
+  it("returns employment-oriented recommendations for A2 and B1 programs", () => {
+    expect(
+      getRecommendationsForProgram("program-a2-emploi").some(
+        (item) => item.label === "La voix passive"
+      )
+    ).toBe(true);
+    expect(
+      getRecommendationsForProgram("program-b1-emploi").some(
+        (item) => item.label === "Le discours indirect simple"
+      )
+    ).toBe(true);
+  });
+
+  it("normalizes labels with light typographic variations", () => {
+    expect(normalizeGrammarLabel("  La   négation ne … pas ")).toBe(
+      normalizeGrammarLabel("la negation ne...pas")
+    );
+    expect(normalizeGrammarLabel("L’expression de la cause")).toBe(
+      normalizeGrammarLabel("l'expression de la cause")
+    );
+  });
+
+  it("detects whether a recommendation is in the selected theme, elsewhere, or absent", () => {
+    const program = sampleProgressionDoc.programs.find(
+      (candidate) => candidate.id === "program-a0-a1"
+    );
+
+    expect(program).toBeDefined();
+    if (!program) {
+      return;
+    }
+
+    expect(
+      getRecommendationStatus(program, "Le verbe être au présent", "theme-a0a1-saluer-se-presenter")
+    ).toBe("in-selected-theme");
+    expect(getRecommendationStatus(program, "Il y a", "theme-a0a1-saluer-se-presenter")).toBe(
+      "in-program"
+    );
+    expect(
+      getRecommendationStatus(program, "Le discours rapporté au passé", "theme-a0a1-saluer-se-presenter")
+    ).toBe("absent");
+  });
+
+  it("filters recommendations by label, category, or tag", () => {
+    const recommendations = getRecommendationsForProgram("program-b1-b2");
+
+    expect(filterRecommendations(recommendations, "modalisation")).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "La modalisation de l'affirmation et de la négation" })
+      ])
+    );
+    expect(filterRecommendations(recommendations, "pronoms").length).toBeGreaterThan(0);
+  });
+
+  it("adds a recommendation to a theme without mutating the program and avoids local duplicates", () => {
+    const program = makeProgram();
+    const original = clone(program);
+    const recommendation = getRecommendationsForProgram("program-a1-a2")[0];
+
+    expect(themeContainsGrammarLabel(program.sequence[2], recommendation.label)).toBe(false);
+
+    const updated = addGrammarPoint(program, "theme-3", {
+      id: "grammar-from-bank",
+      label: recommendation.label,
+      tags: recommendation.tags
+    });
+    const addedPoint = updated.sequence[2].grammarPoints.at(-1);
+
+    expect(addedPoint).toBeDefined();
+    if (!addedPoint) {
+      throw new Error("Le point recommandé devrait être ajouté au thème cible.");
+    }
+
+    expect(addedPoint.id).toBe("grammar-from-bank");
+    expect(addedPoint.label).toBe(recommendation.label);
+    expect(themeContainsGrammarLabel(updated.sequence[2], recommendation.label)).toBe(true);
+    expect(program).toEqual(original);
   });
 });
 

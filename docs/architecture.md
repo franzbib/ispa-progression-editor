@@ -17,6 +17,7 @@ L'application est une app Next.js avec App Router, React, TypeScript, Tailwind C
 - `lib/progression/` regroupe les operations pures sur le modele.
 - `lib/import/`, `lib/export/`, `lib/validators/` isolent les entrees/sorties.
 - `data/sample-progressions.ts` fournit les programmes A0-A1, A1-A2, A2-B1 et B1-B2. A0-A1 est une base pre-A1 -> A1 editable.
+- `data/cefr-grammar-bank.ts` fournit une banque editoriale de recommandations grammaticales par programme.
 - `tests/` verrouille les invariants metier.
 
 ## Flux d'etat
@@ -28,6 +29,12 @@ La persistance est faite dans `localStorage` avec restauration validee par Zod. 
 ## Vue simple
 
 `SimpleProgramView` affiche un seul programme depuis le `ProgressionDoc` courant: titre, themes ordonnes et points de grammaire ordonnes. Elle n'a pas de controles d'edition et utilise des styles sobres avec `break-inside: avoid` pour l'impression navigateur/PDF.
+
+## Banque CECRL
+
+La banque CECRL est une ressource editoriale separee du document utilisateur. Elle propose des points de grammaire recommandes pour le programme actif, compare les labels avec une normalisation legere, puis indique si un point est deja dans le theme selectionne, ailleurs dans le programme ou absent.
+
+L'ajout depuis la banque cree un nouveau point avec un nouvel ID stable. Les doublons sont bloques dans le theme cible, mais un meme label peut rester autorise dans un autre theme, conformement au modele canonique qui accepte les doublons de labels.
 
 ## Drag-and-drop
 

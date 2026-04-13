@@ -34,15 +34,15 @@ button:disabled {
 
 @layer components {
   .btn-primary {
-    @apply rounded-md border border-[#2c6b57] bg-[#2c6b57] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#245747] focus:outline-none focus:ring-2 focus:ring-[#7bc5a2];
+    @apply rounded-md border border-[#19715c] bg-[#19715c] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#145c4a] focus:outline-none focus:ring-2 focus:ring-[#93d7bf];
   }
 
   .btn-secondary {
-    @apply rounded-md border border-[#b9c4b2] bg-white px-3 py-2 text-sm font-semibold text-[#26352d] transition hover:border-[#2c6b57] focus:outline-none focus:ring-2 focus:ring-[#7bc5a2];
+    @apply rounded-md border border-[#b9dccc] bg-white px-3 py-2 text-sm font-semibold text-[#26352d] transition hover:border-[#d84f6a] hover:bg-[#fff7f9] focus:outline-none focus:ring-2 focus:ring-[#93d7bf];
   }
 
   .btn-quiet {
-    @apply rounded-md border border-[#d9ddd2] bg-[#fbfcf8] px-2 py-1 text-xs font-semibold text-[#596257] transition hover:border-[#2c6b57] focus:outline-none focus:ring-2 focus:ring-[#7bc5a2];
+    @apply rounded-md border border-[#d5e4db] bg-[#f8fcfa] px-2 py-1 text-xs font-semibold text-[#596257] transition hover:border-[#2fa4bf] hover:bg-[#eef9ff] focus:outline-none focus:ring-2 focus:ring-[#93d7bf];
   }
 
   .btn-danger {

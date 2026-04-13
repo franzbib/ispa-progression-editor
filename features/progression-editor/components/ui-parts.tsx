@@ -3,8 +3,9 @@ import { ImportReport } from "@/lib/types/progression";
 
 export function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-md border border-[#d9ddd2] bg-[#fbfcf8] p-4 shadow-panel print:hidden">
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.08em] text-[#2c6b57]">
+    <section className="rounded-lg border border-[#b9dccc] bg-white p-4 shadow-panel print:hidden">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.08em] text-[#19715c]">
+        <span className="h-5 w-1.5 rounded-full bg-[#d84f6a]" aria-hidden="true" />
         {title}
       </h2>
       {children}

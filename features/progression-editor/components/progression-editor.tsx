@@ -15,7 +15,8 @@ import {
   verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 import { FormEvent, useMemo, useState } from "react";
-import { sampleProgressionDoc, sourceImportNotes } from "@/data/sample-progressions";
+import { CefrGrammarRecommendation } from "@/data/cefr-grammar-bank";
+import { sampleProgressionDoc } from "@/data/sample-progressions";
 import { downloadTextFile } from "@/lib/browser/download";
 import { exportToCsv } from "@/lib/export/csv";
 import { exportToMarkdown } from "@/lib/export/markdown";
@@ -23,6 +24,7 @@ import { migrateLegacyToV1 } from "@/lib/import/legacy";
 import { importThemesFromPlainText } from "@/lib/import/theme-list";
 import { createId } from "@/lib/id";
 import { withExportMetadata } from "@/lib/progression/document";
+import { themeContainsGrammarLabel } from "@/lib/progression/grammar-bank";
 import {
   addGrammarPoint,
   addTheme,
@@ -39,6 +41,7 @@ import {
 import { GrammarPoint, ImportReport, Program, Theme } from "@/lib/types/progression";
 import { useProgressionDocument } from "../hooks/use-progression-document";
 import { findGrammarLocation, parseDragId, themeDragId } from "../lib/drag-ids";
+import { CefrGrammarBank } from "./cefr-grammar-bank";
 import { SimpleProgramView } from "./simple-program-view";
 import { ThemeCard } from "./theme-card";
 import { EmptyState, ImportReportBox, NoticeTone, Panel, StatusPill, noticeClass } from "./ui-parts";
@@ -68,6 +71,7 @@ export function ProgressionEditor() {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [importReport, setImportReport] = useState<ImportReport | null>(null);
   const [simpleProgramId, setSimpleProgramId] = useState<string | null>(null);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -96,21 +100,6 @@ export function ProgressionEditor() {
       return themeMatch || grammarMatch;
     });
   }, [currentProgram, search]);
-
-  const grammarBank = useMemo(() => {
-    if (!currentProgram) {
-      return [];
-    }
-
-    const labels = new Set<string>();
-    for (const theme of currentProgram.sequence) {
-      for (const point of theme.grammarPoints) {
-        labels.add(point.label);
-      }
-    }
-
-    return [...labels].sort((left, right) => left.localeCompare(right, "fr"));
-  }, [currentProgram]);
 
   const selectedThemeForBank =
     currentProgram?.sequence.find((theme) => theme.id === activeThemeId) ??
@@ -228,6 +217,44 @@ export function ProgressionEditor() {
         label: trimmed
       })
     );
+  }
+
+  function addRecommendedGrammar(
+    recommendation: CefrGrammarRecommendation,
+    targetThemeId: string
+  ) {
+    if (!currentProgram) {
+      return;
+    }
+
+    const targetTheme = currentProgram.sequence.find((theme) => theme.id === targetThemeId);
+
+    if (!targetTheme) {
+      setNotice({ tone: "error", message: "Aucun thème cible disponible." });
+      return;
+    }
+
+    if (themeContainsGrammarLabel(targetTheme, recommendation.label)) {
+      setNotice({
+        tone: "info",
+        message: "Ce point est déjà présent dans le thème cible."
+      });
+      return;
+    }
+
+    runProgramMutation((program) =>
+      addGrammarPoint(program, targetTheme.id, {
+        id: createId("grammar"),
+        label: recommendation.label,
+        notes: recommendation.notes,
+        tags: recommendation.tags
+      })
+    );
+    setActiveThemeId(targetTheme.id);
+    setNotice({
+      tone: "success",
+      message: `Point ajouté au thème "${targetTheme.themeLabel}".`
+    });
   }
 
   function moveThemeByButton(themeId: string, direction: -1 | 1) {
@@ -383,23 +410,38 @@ export function ProgressionEditor() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f8f5] text-[#20231f]">
-      <section className="border-b border-[#d9ddd2] bg-[#fbfcf8]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.08em] text-[#2c6b57]">
-              Éditeur de progressions FLE / F.O.U.
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold text-[#20231f] md:text-4xl">
-              Programmes, thèmes, grammaire
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-[#596257]">
-              Les thèmes portent leurs points de grammaire. Quand un thème bouge,
-              ses liens restent intacts; quand un point change de thème, son identifiant
-              reste stable.
-            </p>
+    <main className="min-h-screen bg-[#eef9f4] text-[#20231f]">
+      <section className="border-b border-[#b9dccc] bg-[linear-gradient(135deg,#f8fff9_0%,#e9f8ff_42%,#fff1f4_72%,#fff8df_100%)]">
+        <div className="mx-auto flex max-w-[1500px] flex-col gap-5 px-5 py-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex max-w-4xl flex-col gap-4 sm:flex-row sm:items-start">
+            <img
+              className="h-16 w-28 shrink-0 rounded-md border border-[#d8e7df] bg-white object-contain p-2 shadow-panel"
+              src="/ispa-logo.jpg"
+              alt="Logo ISPA Amiens"
+            />
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.08em] text-[#19715c]">
+                Éditeur de progressions FLE / F.O.U.
+              </p>
+              <h1 className="mt-2 text-3xl font-semibold text-[#20231f] md:text-4xl">
+                Programmes, thèmes, grammaire
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-[#596257]">
+                Les thèmes portent leurs points de grammaire. Quand un thème bouge,
+                ses liens restent intacts; quand un point change de thème, son identifiant
+                reste stable.
+              </p>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2 text-sm">
+          <div className="flex max-w-sm flex-wrap justify-start gap-2 text-sm lg:justify-end">
+            <button
+              className="mb-1 inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#19715c] bg-white text-base font-bold text-[#19715c] shadow-sm transition hover:bg-[#e5f8f1]"
+              type="button"
+              aria-label="Ouvrir l'aide"
+              onClick={() => setIsHelpOpen(true)}
+            >
+              ?
+            </button>
             <StatusPill label={`${doc.programs.length} programmes`} />
             <StatusPill label={`${currentProgram.sequence.length} thèmes`} />
             <StatusPill
@@ -414,19 +456,19 @@ export function ProgressionEditor() {
             />
           </div>
         </div>
+        <ProgramBand
+          programs={doc.programs}
+          currentProgram={currentProgram}
+          onSelect={(program) => {
+            setActiveProgramId(program.id);
+            setActiveThemeId(program.sequence[0]?.id ?? "");
+          }}
+          onOpenSimple={(program) => setSimpleProgramId(program.id)}
+        />
       </section>
 
-      <div className="mx-auto grid max-w-7xl gap-5 px-5 py-5 lg:grid-cols-[260px_minmax(0,1fr)_300px]">
-        <aside className="space-y-4">
-          <ProgramPanel
-            programs={doc.programs}
-            currentProgram={currentProgram}
-            onSelect={(program) => {
-              setActiveProgramId(program.id);
-              setActiveThemeId(program.sequence[0]?.id ?? "");
-            }}
-            onOpenSimple={(program) => setSimpleProgramId(program.id)}
-          />
+      <div className="mx-auto grid max-w-[1500px] gap-5 px-5 py-5 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[260px_minmax(0,1fr)_340px]">
+        <aside className="space-y-4 lg:sticky lg:top-5 lg:self-start">
           <ActionPanel
             canUndo={canUndo}
             canRedo={canRedo}
@@ -441,6 +483,13 @@ export function ProgressionEditor() {
                 setNotice({ tone: "info", message: "Données d'exemple restaurées." });
               }
             }}
+          />
+          <ImportPanel
+            assistText={assistText}
+            importReport={importReport}
+            onAssistTextChange={setAssistText}
+            onFileImport={importJsonFile}
+            onApplyPlainTextImport={applyPlainTextImport}
           />
         </aside>
 
@@ -518,37 +567,23 @@ export function ProgressionEditor() {
           </DndContext>
         </section>
 
-        <aside className="space-y-4">
-          <ImportPanel
-            assistText={assistText}
-            importReport={importReport}
-            onAssistTextChange={setAssistText}
-            onFileImport={importJsonFile}
-            onApplyPlainTextImport={applyPlainTextImport}
-          />
-          <GrammarBankPanel
-            grammarBank={grammarBank}
+        <aside className="space-y-4 lg:col-start-2 xl:col-start-auto xl:sticky xl:top-5 xl:self-start">
+          <CefrGrammarBank
+            program={currentProgram}
             selectedTheme={selectedThemeForBank}
-            onAddGrammar={(label) => {
-              if (selectedThemeForBank) {
-                addGrammar(selectedThemeForBank.id, label);
-              }
-            }}
+            onAddRecommendation={addRecommendedGrammar}
           />
-          <Panel title="Sources">
-            <ul className="space-y-2 text-xs leading-5 text-[#596257]">
-              {sourceImportNotes.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
-          </Panel>
         </aside>
       </div>
+      <footer className="mx-auto max-w-[1500px] px-5 pb-6 text-center text-xs text-[#697267]">
+        Page conçue par François Carbonnier.
+      </footer>
+      {isHelpOpen ? <HelpDialog onClose={() => setIsHelpOpen(false)} /> : null}
     </main>
   );
 }
 
-function ProgramPanel({
+function ProgramBand({
   programs,
   currentProgram,
   onSelect,
@@ -560,36 +595,38 @@ function ProgramPanel({
   onOpenSimple: (program: Program) => void;
 }) {
   return (
-    <Panel title="Programmes">
-      <div className="space-y-2">
-        {programs.map((program) => (
-          <div
-            key={program.id}
-            className={`rounded-md border p-2 transition ${
-              program.id === currentProgram.id
-                ? "border-[#2c6b57] bg-[#e6f3ec] text-[#193c31]"
-                : "border-[#d9ddd2] bg-white hover:border-[#76a58f]"
-            }`}
-          >
-            <button
-              className="w-full rounded-md px-1 py-1 text-left text-sm"
-              type="button"
-              onClick={() => onSelect(program)}
+    <div className="mx-auto max-w-[1500px] px-5 pb-5">
+      <div className="overflow-x-auto rounded-lg border border-[#b9dccc] bg-white/90 p-2 shadow-panel">
+        <div className="flex min-w-max gap-2">
+          {programs.map((program) => (
+            <div
+              key={program.id}
+              className={`flex w-56 shrink-0 items-center justify-between gap-3 rounded-lg border p-3 transition ${
+                program.id === currentProgram.id
+                  ? "border-[#19715c] bg-[#e5f8f1] text-[#193c31] shadow-sm"
+                  : "border-[#d9e8df] bg-[#fbfffd] hover:border-[#d84f6a] hover:bg-[#fff7f9]"
+              }`}
             >
-              <span className="block font-semibold">{program.label}</span>
-              <span className="text-xs text-[#697267]">{program.sequence.length} thèmes</span>
-            </button>
-            <button
-              className="mt-2 w-full rounded-md border border-[#cbd3c4] bg-white px-2 py-1 text-xs font-semibold text-[#26352d] hover:border-[#2c6b57]"
-              type="button"
-              onClick={() => onOpenSimple(program)}
-            >
-              Vue simple
-            </button>
-          </div>
-        ))}
+              <button
+                className="min-w-0 flex-1 rounded-md text-left text-sm"
+                type="button"
+                onClick={() => onSelect(program)}
+              >
+                <span className="block truncate text-base font-semibold">{program.label}</span>
+                <span className="text-xs text-[#697267]">{program.sequence.length} thèmes</span>
+              </button>
+              <button
+                className="shrink-0 rounded-md border border-[#f0b4c0] bg-white px-2 py-1 text-xs font-semibold text-[#9a2f47] hover:border-[#d84f6a] hover:bg-[#fff1f4]"
+                type="button"
+                onClick={() => onOpenSimple(program)}
+              >
+                Imprimer
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
-    </Panel>
+    </div>
   );
 }
 
@@ -653,12 +690,12 @@ function EditorToolbar({
   onAddTheme: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <div className="rounded-md border border-[#d9ddd2] bg-white p-4 shadow-panel">
+    <div className="rounded-lg border border-[#b9dccc] bg-white p-4 shadow-panel">
       <div className="grid gap-3 lg:grid-cols-[1fr_220px]">
         <label className="block text-sm font-medium">
           Recherche
           <input
-            className="mt-1 w-full rounded-md border border-[#cbd3c4] px-3 py-2 text-sm outline-none focus:border-[#2c6b57]"
+            className="mt-1 w-full rounded-md border border-[#cbd3c4] bg-[#fbfffd] px-3 py-2 text-sm outline-none focus:border-[#19715c]"
             placeholder="Filtrer par thème ou grammaire"
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
@@ -668,7 +705,7 @@ function EditorToolbar({
           Ajouter un thème
           <div className="mt-1 flex gap-2">
             <input
-              className="min-w-0 flex-1 rounded-md border border-[#cbd3c4] px-3 py-2 text-sm outline-none focus:border-[#2c6b57]"
+              className="min-w-0 flex-1 rounded-md border border-[#cbd3c4] bg-[#fbfffd] px-3 py-2 text-sm outline-none focus:border-[#19715c]"
               value={newThemeLabel}
               onChange={(event) => onNewThemeLabelChange(event.target.value)}
               placeholder="Nouveau thème"
@@ -723,7 +760,7 @@ function ImportPanel({
         <label className="block text-sm font-medium">
           Liste de thèmes
           <textarea
-            className="mt-2 min-h-32 w-full rounded-md border border-[#cbd3c4] px-3 py-2 text-sm outline-none focus:border-[#2c6b57]"
+            className="mt-2 min-h-32 w-full rounded-md border border-[#cbd3c4] bg-[#fbfffd] px-3 py-2 text-sm outline-none focus:border-[#19715c]"
             value={assistText}
             onChange={(event) => onAssistTextChange(event.target.value)}
             placeholder={"Un thème par ligne\nVacances sera ignoré comme jalon"}
@@ -751,38 +788,88 @@ function ImportPanel({
   );
 }
 
-function GrammarBankPanel({
-  grammarBank,
-  selectedTheme,
-  onAddGrammar
-}: {
-  grammarBank: string[];
-  selectedTheme: Theme | undefined;
-  onAddGrammar: (label: string) => void;
-}) {
+function HelpDialog({ onClose }: { onClose: () => void }) {
   return (
-    <Panel title="Banque de grammaire">
-      {selectedTheme ? (
-        <p className="mb-3 text-xs text-[#697267]">
-          Ajout dans: <strong>{selectedTheme.themeLabel}</strong>
-        </p>
-      ) : null}
-      <div className="max-h-72 space-y-2 overflow-auto pr-1">
-        {grammarBank.length === 0 ? (
-          <p className="text-sm text-[#697267]">Aucun point disponible.</p>
-        ) : (
-          grammarBank.slice(0, 40).map((label) => (
-            <button
-              key={label}
-              className="w-full rounded-md border border-[#d9ddd2] bg-white px-2 py-2 text-left text-xs hover:border-[#2c6b57]"
-              type="button"
-              onClick={() => onAddGrammar(label)}
-            >
-              {label}
-            </button>
-          ))
-        )}
-      </div>
-    </Panel>
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-[#1c2b25]/35 px-4 py-6 backdrop-blur-sm print:hidden">
+      <section
+        className="max-h-[calc(100vh-3rem)] w-full max-w-3xl overflow-y-auto rounded-lg border border-[#b9dccc] bg-white shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="help-dialog-title"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-[#d9e8df] bg-[linear-gradient(135deg,#e5f8f1,#eef9ff_55%,#fff1f4)] px-5 py-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#19715c]">
+              Aide rapide
+            </p>
+            <h2 id="help-dialog-title" className="mt-1 text-2xl font-semibold text-[#20231f]">
+              Utiliser l’éditeur de progressions
+            </h2>
+          </div>
+          <button
+            className="rounded-md border border-[#cbd3c4] bg-white px-3 py-1 text-sm font-semibold text-[#26352d] hover:border-[#d84f6a] hover:bg-[#fff7f9]"
+            type="button"
+            onClick={onClose}
+          >
+            Fermer
+          </button>
+        </div>
+
+        <div className="grid gap-5 px-5 py-5 text-sm leading-6 text-[#3c463d] md:grid-cols-2">
+          <div>
+            <h3 className="font-semibold text-[#19715c]">1. Construire une progression</h3>
+            <p className="mt-2">
+              Choisissez un programme dans le bandeau du haut. Les cartes centrales sont les
+              thèmes, dans leur ordre pédagogique. Chaque thème conserve ses points de
+              grammaire quand il est déplacé.
+            </p>
+            <p className="mt-2">
+              Vous pouvez renommer, ajouter ou supprimer un thème sans changer son identifiant
+              interne. Les boutons monter et descendre restent disponibles si le glisser-déposer
+              n’est pas pratique.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-[#d84f6a]">2. Gérer les points de grammaire</h3>
+            <p className="mt-2">
+              Dans chaque thème, les points peuvent être réordonnés ou envoyés vers un autre
+              thème. La banque CECRL à droite propose des points recommandés pour le programme
+              actif et indique ceux qui sont déjà intégrés.
+            </p>
+            <p className="mt-2">
+              Sélectionnez un thème, puis utilisez le bouton + de la banque pour ajouter un
+              point au thème cible. Un doublon exact dans le même thème est bloqué.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-[#2f7e9a]">3. Importer</h3>
+            <p className="mt-2">
+              Le panneau Import accepte un JSON canonique exporté par l’application, un ancien
+              format compatible quand il est reconnu, ou une simple liste de thèmes collée dans
+              la zone de texte.
+            </p>
+            <p className="mt-2">
+              Les imports sont validés avant application. Les problèmes sont affichés dans un
+              rapport au lieu d’être masqués.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-[#9a6a00]">4. Exporter et imprimer</h3>
+            <p className="mt-2">
+              Exportez en JSON v1 pour réimporter sans perte, en CSV pour tableur, ou en
+              Markdown pour une lecture humaine. Le bouton imprimable lance l’impression
+              navigateur ou l’enregistrement PDF.
+            </p>
+            <p className="mt-2">
+              Les changements sont sauvegardés localement dans le navigateur. Undo et redo
+              conservent les derniers états de travail.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
