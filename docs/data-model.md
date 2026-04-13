@@ -10,22 +10,22 @@ Le format canonique est versionne et hierarchique:
   "metadata": {
     "exportedAt": "2026-04-13T00:00:00.000Z",
     "appVersion": "0.1.0",
-    "source": "exports A2-B1 et B1-B2 fournis"
+    "source": "base pedagogique pre-A1 a B1-B2"
   },
   "programs": [
     {
-      "id": "program-a2-b1",
-      "label": "A2-B1",
+      "id": "program-a0-a1",
+      "label": "A0-A1",
       "notes": "Notes optionnelles",
       "sequence": [
         {
-          "id": "theme-a2b1-se-presenter",
-          "themeLabel": "Se présenter",
+          "id": "theme-a0a1-saluer-se-presenter",
+          "themeLabel": "Saluer et se présenter",
           "notes": "Notes optionnelles",
           "grammarPoints": [
             {
-              "id": "grammar-a2b1-se-presenter-futur-simple",
-              "label": "Le futur simple",
+              "id": "grammar-a0a1-saluer-pronoms-sujets",
+              "label": "Les pronoms sujets",
               "notes": "Notes optionnelles",
               "tags": ["temps"]
             }
@@ -53,4 +53,4 @@ La validation runtime est dans `lib/validators/progression.ts` avec Zod. Elle ve
 
 ## Donnees d'exemple
 
-`data/sample-progressions.ts` initialise A2-B1 et B1-B2 a partir des exports fournis. Les documents calendaires sont interpretes comme ordre relatif; les dates exactes ne sont pas encodees.
+`data/sample-progressions.ts` initialise A0-A1, A1-A2, A2-B1 et B1-B2. Le label produit A0-A1 est conserve dans l'interface, mais documente comme progression pedagogique pre-A1 -> A1 pour rester coherent avec le cadrage CECRL. Les documents calendaires A2-B1 et B1-B2 sont interpretes comme ordre relatif; les dates exactes ne sont pas encodees.

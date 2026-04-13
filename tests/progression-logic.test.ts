@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { sampleProgressionDoc } from "@/data/sample-progressions";
+import { SimpleProgramView } from "@/features/progression-editor/components/simple-program-view";
 import { exportToCsv } from "@/lib/export/csv";
 import { exportToMarkdown } from "@/lib/export/markdown";
 import { migrateLegacyToV1 } from "@/lib/import/legacy";
+import { mergeMissingDefaultPrograms } from "@/lib/progression/document";
 import {
   moveGrammarPointBetweenThemes,
   renameGrammarPoint,
@@ -110,6 +115,73 @@ describe("validation and migration", () => {
   });
 });
 
+describe("sample progression data", () => {
+  it("contains the four default programs in the expected order", () => {
+    expect(sampleProgressionDoc.programs.map((program) => program.id)).toEqual([
+      "program-a0-a1",
+      "program-a1-a2",
+      "program-a2-b1",
+      "program-b1-b2"
+    ]);
+  });
+
+  it("is a valid canonical document with unique IDs", () => {
+    const result = validateProgressionDoc(sampleProgressionDoc);
+    const ids = collectIds(sampleProgressionDoc);
+
+    expect(result.success).toBe(true);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("adds missing default programs to an older saved document without replacing existing programs", () => {
+    const olderDoc: ProgressionDoc = {
+      ...sampleProgressionDoc,
+      programs: sampleProgressionDoc.programs
+        .filter((program) => program.id === "program-a2-b1" || program.id === "program-b1-b2")
+        .map((program) =>
+          program.id === "program-a2-b1"
+            ? { ...program, label: "A2-B1 modifié localement" }
+            : program
+        )
+    };
+
+    const merged = mergeMissingDefaultPrograms(olderDoc, sampleProgressionDoc);
+
+    expect(merged.programs.map((program) => program.id)).toEqual([
+      "program-a0-a1",
+      "program-a1-a2",
+      "program-a2-b1",
+      "program-b1-b2"
+    ]);
+    expect(merged.programs[2].label).toBe("A2-B1 modifié localement");
+  });
+});
+
+describe("simple printable view", () => {
+  it("renders a readable program outline without editing controls", () => {
+    const program = sampleProgressionDoc.programs[0];
+    const html = renderToStaticMarkup(
+      createElement(SimpleProgramView, {
+        program,
+        onBack: () => undefined,
+        onPrint: () => undefined
+      })
+    );
+
+    expect(html).toContain("A0-A1");
+    expect(html).toContain("Saluer et se présenter");
+    expect(html).toContain("Les pronoms sujets");
+    expect(html).toContain("break-inside-avoid");
+    expect(html.indexOf("Saluer et se présenter")).toBeLessThan(
+      html.indexOf("Identifier des personnes et des objets")
+    );
+    expect(html).not.toContain("Ajouter");
+    expect(html).not.toContain("Supprimer");
+    expect(html).not.toContain("Banque de grammaire");
+    expect(html).not.toContain("::");
+  });
+});
+
 describe("exports", () => {
   it("exports CSV with expected headers and escaped cells", () => {
     const doc = makeDoc();
@@ -169,4 +241,14 @@ function makeTheme(id: string, themeLabel: string, grammarPoints: Theme["grammar
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function collectIds(doc: ProgressionDoc): string[] {
+  return doc.programs.flatMap((program) => [
+    program.id,
+    ...program.sequence.flatMap((theme) => [
+      theme.id,
+      ...theme.grammarPoints.map((point) => point.id)
+    ])
+  ]);
 }

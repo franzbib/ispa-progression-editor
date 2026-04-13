@@ -51,11 +51,20 @@ button:disabled {
 }
 
 @media print {
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+
   body {
     background: white;
   }
 
   main {
     background: white !important;
+  }
+
+  .simple-print-sheet {
+    color: #111111;
   }
 }

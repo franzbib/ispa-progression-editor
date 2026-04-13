@@ -5,9 +5,393 @@ export const sampleProgressionDoc: ProgressionDoc = {
   metadata: {
     exportedAt: "2026-04-13T00:00:00.000Z",
     appVersion: "0.1.0",
-    source: "exports A2-B1 et B1-B2 fournis, dates ignorees"
+    source: "base pedagogique pre-A1 a B1-B2, exports A2-B1 et B1-B2 fournis"
   },
   programs: [
+    {
+      id: "program-a0-a1",
+      label: "A0-A1",
+      notes:
+        "Progression pedagogique de type pre-A1 -> A1. Base editable, non exhaustive, pour une entree en FLE.",
+      sequence: [
+        {
+          id: "theme-a0a1-saluer-se-presenter",
+          themeLabel: "Saluer et se présenter",
+          grammarPoints: [
+            {
+              id: "grammar-a0a1-saluer-pronoms-sujets",
+              label: "Les pronoms sujets"
+            },
+            {
+              id: "grammar-a0a1-saluer-etre-present",
+              label: "Le verbe être au présent"
+            },
+            {
+              id: "grammar-a0a1-saluer-avoir-present",
+              label: "Le verbe avoir au présent"
+            },
+            {
+              id: "grammar-a0a1-saluer-phrase-declarative",
+              label: "La phrase déclarative simple"
+            },
+            {
+              id: "grammar-a0a1-saluer-nationalites",
+              label: "Les adjectifs de nationalité et l'accord simple"
+            }
+          ]
+        },
+        {
+          id: "theme-a0a1-identifier",
+          themeLabel: "Identifier des personnes et des objets",
+          grammarPoints: [
+            {
+              id: "grammar-a0a1-identifier-c-est",
+              label: "C'est / ce sont"
+            },
+            {
+              id: "grammar-a0a1-identifier-il-y-a",
+              label: "Il y a"
+            },
+            {
+              id: "grammar-a0a1-identifier-articles-definis",
+              label: "Les articles définis"
+            },
+            {
+              id: "grammar-a0a1-identifier-articles-indefinis",
+              label: "Les articles indéfinis"
+            },
+            {
+              id: "grammar-a0a1-identifier-genre-nombre",
+              label: "Le genre et le nombre des noms"
+            },
+            {
+              id: "grammar-a0a1-identifier-accord-adjectif",
+              label: "L'accord de l'adjectif qualificatif simple"
+            }
+          ]
+        },
+        {
+          id: "theme-a0a1-questions-simples",
+          themeLabel: "Poser des questions simples",
+          grammarPoints: [
+            {
+              id: "grammar-a0a1-questions-intonation",
+              label: "L'interrogation par intonation"
+            },
+            {
+              id: "grammar-a0a1-questions-est-ce-que",
+              label: "Est-ce que"
+            },
+            {
+              id: "grammar-a0a1-questions-mots-interrogatifs",
+              label: "Qui, qu'est-ce que, où, comment"
+            },
+            {
+              id: "grammar-a0a1-questions-oui-non-si",
+              label: "La réponse oui, non, si"
+            },
+            {
+              id: "grammar-a0a1-questions-negation",
+              label: "La négation ne... pas"
+            }
+          ]
+        },
+        {
+          id: "theme-a0a1-temps-quotidien",
+          themeLabel: "Parler du temps quotidien",
+          grammarPoints: [
+            {
+              id: "grammar-a0a1-temps-jours-dates-heures",
+              label: "Les jours, mois, dates et heures"
+            },
+            {
+              id: "grammar-a0a1-temps-prepositions",
+              label: "Les prépositions de temps les plus fréquentes"
+            },
+            {
+              id: "grammar-a0a1-temps-verbes-er",
+              label: "Le présent des verbes réguliers en -er"
+            },
+            {
+              id: "grammar-a0a1-temps-aller",
+              label: "Aller au présent"
+            },
+            {
+              id: "grammar-a0a1-temps-venir",
+              label: "Venir au présent"
+            }
+          ]
+        },
+        {
+          id: "theme-a0a1-routine",
+          themeLabel: "Décrire sa routine",
+          grammarPoints: [
+            {
+              id: "grammar-a0a1-routine-pronominaux",
+              label: "Les verbes pronominaux usuels"
+            },
+            {
+              id: "grammar-a0a1-routine-frequence",
+              label: "Les adverbes de fréquence"
+            },
+            {
+              id: "grammar-a0a1-routine-connecteurs",
+              label: "Les connecteurs très simples: et, puis, après"
+            },
+            {
+              id: "grammar-a0a1-routine-faire",
+              label: "Faire au présent"
+            },
+            {
+              id: "grammar-a0a1-routine-prendre",
+              label: "Prendre au présent"
+            }
+          ]
+        },
+        {
+          id: "theme-a0a1-se-reperer",
+          themeLabel: "Se repérer et se déplacer",
+          grammarPoints: [
+            {
+              id: "grammar-a0a1-reperer-prepositions-lieu",
+              label: "Les prépositions de lieu de base"
+            },
+            {
+              id: "grammar-a0a1-reperer-presentatifs",
+              label: "Il y a, voici, voilà"
+            },
+            {
+              id: "grammar-a0a1-reperer-imperatif",
+              label: "L'impératif des verbes fréquents"
+            },
+            {
+              id: "grammar-a0a1-reperer-aller-prepositions",
+              label: "Aller + à, au, en, aux"
+            },
+            {
+              id: "grammar-a0a1-reperer-chemin",
+              label: "Les structures pour demander un chemin"
+            }
+          ]
+        },
+        {
+          id: "theme-a0a1-acheter-demander",
+          themeLabel: "Acheter et demander quelque chose",
+          grammarPoints: [
+            {
+              id: "grammar-a0a1-acheter-je-voudrais",
+              label: "Je voudrais"
+            },
+            {
+              id: "grammar-a0a1-acheter-quantites-simples",
+              label: "Les quantités simples"
+            },
+            {
+              id: "grammar-a0a1-acheter-combien-de",
+              label: "Combien de"
+            },
+            {
+              id: "grammar-a0a1-acheter-partitifs",
+              label: "Les articles partitifs les plus courants"
+            },
+            {
+              id: "grammar-a0a1-acheter-pouvoir-vouloir",
+              label: "Pouvoir et vouloir au présent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: "program-a1-a2",
+      label: "A1-A2",
+      notes:
+        "Progression de consolidation A1 vers A2, centree sur les usages courants et les premiers recits.",
+      sequence: [
+        {
+          id: "theme-a1a2-habitudes-environnement",
+          themeLabel: "Parler de ses habitudes et de son environnement",
+          grammarPoints: [
+            {
+              id: "grammar-a1a2-habitudes-present",
+              label: "Révision et extension du présent"
+            },
+            {
+              id: "grammar-a1a2-habitudes-pronominaux",
+              label: "Les verbes pronominaux au présent"
+            },
+            {
+              id: "grammar-a1a2-habitudes-frequence",
+              label: "Les adverbes de fréquence"
+            },
+            {
+              id: "grammar-a1a2-habitudes-depuis",
+              label: "Depuis + durée"
+            },
+            {
+              id: "grammar-a1a2-habitudes-modalite",
+              label: "Il faut, on peut, on doit"
+            }
+          ]
+        },
+        {
+          id: "theme-a1a2-logement-ville",
+          themeLabel: "Décrire un logement, un lieu, une ville",
+          grammarPoints: [
+            {
+              id: "grammar-a1a2-logement-lieu",
+              label: "Les prépositions et locutions de lieu"
+            },
+            {
+              id: "grammar-a1a2-logement-c-est-il-est",
+              label: "L'opposition c'est / il est"
+            },
+            {
+              id: "grammar-a1a2-logement-adjectifs-place",
+              label: "Les adjectifs qualificatifs et leur place"
+            },
+            {
+              id: "grammar-a1a2-logement-presentatifs",
+              label: "Les présentatifs"
+            },
+            {
+              id: "grammar-a1a2-logement-comparatifs",
+              label: "Les comparatifs simples"
+            }
+          ]
+        },
+        {
+          id: "theme-a1a2-courses-manger",
+          themeLabel: "Faire des courses, manger, commander",
+          grammarPoints: [
+            {
+              id: "grammar-a1a2-courses-partitifs",
+              label: "Les articles partitifs"
+            },
+            {
+              id: "grammar-a1a2-courses-quantites",
+              label: "Les quantités précises et approximatives"
+            },
+            {
+              id: "grammar-a1a2-courses-imperatif",
+              label: "L'impératif"
+            },
+            {
+              id: "grammar-a1a2-courses-pronoms-cod",
+              label: "Les pronoms COD simples"
+            },
+            {
+              id: "grammar-a1a2-courses-modalite",
+              label: "Il faut, devoir, pouvoir en situation concrète"
+            }
+          ]
+        },
+        {
+          id: "theme-a1a2-actions-passees",
+          themeLabel: "Raconter des actions passées",
+          grammarPoints: [
+            {
+              id: "grammar-a1a2-passe-compose-avoir",
+              label: "Le passé composé avec avoir"
+            },
+            {
+              id: "grammar-a1a2-passe-compose-etre",
+              label: "Le passé composé avec être"
+            },
+            {
+              id: "grammar-a1a2-passe-participes",
+              label: "Les participes passés fréquents"
+            },
+            {
+              id: "grammar-a1a2-passe-marqueurs",
+              label: "Les marqueurs temporels du passé"
+            },
+            {
+              id: "grammar-a1a2-passe-present-pc",
+              label: "L'opposition présent / passé composé dans des emplois simples"
+            }
+          ]
+        },
+        {
+          id: "theme-a1a2-projets-intentions",
+          themeLabel: "Parler de projets et d'intentions",
+          grammarPoints: [
+            {
+              id: "grammar-a1a2-projets-futur-proche",
+              label: "Le futur proche"
+            },
+            {
+              id: "grammar-a1a2-projets-vouloir-pouvoir-devoir",
+              label: "Vouloir, pouvoir, devoir"
+            },
+            {
+              id: "grammar-a1a2-projets-pour-infinitif",
+              label: "Pour + infinitif"
+            },
+            {
+              id: "grammar-a1a2-projets-cause",
+              label: "Parce que / car"
+            },
+            {
+              id: "grammar-a1a2-projets-quand",
+              label: "Quand + présent pour parler d'un futur proche simple"
+            }
+          ]
+        },
+        {
+          id: "theme-a1a2-comparer-choisir",
+          themeLabel: "Comparer, choisir, justifier",
+          grammarPoints: [
+            {
+              id: "grammar-a1a2-comparer-comparatif",
+              label: "Le comparatif de supériorité, d'infériorité et d'égalité"
+            },
+            {
+              id: "grammar-a1a2-comparer-superlatif",
+              label: "Le superlatif simple"
+            },
+            {
+              id: "grammar-a1a2-comparer-meilleur-mieux",
+              label: "Meilleur / mieux"
+            },
+            {
+              id: "grammar-a1a2-comparer-plus-moins-aussi",
+              label: "Plus, moins, aussi"
+            },
+            {
+              id: "grammar-a1a2-comparer-preference",
+              label: "Les structures pour exprimer une préférence"
+            }
+          ]
+        },
+        {
+          id: "theme-a1a2-aide-probleme",
+          themeLabel: "Demander de l'aide, expliquer un problème",
+          grammarPoints: [
+            {
+              id: "grammar-a1a2-aide-pronoms-coi",
+              label: "Les pronoms COI les plus fréquents"
+            },
+            {
+              id: "grammar-a1a2-aide-il-faut",
+              label: "Il faut / il ne faut pas"
+            },
+            {
+              id: "grammar-a1a2-aide-on-peut",
+              label: "On peut / on ne peut pas"
+            },
+            {
+              id: "grammar-a1a2-aide-cause",
+              label: "L'expression de la cause simple"
+            },
+            {
+              id: "grammar-a1a2-aide-politesse",
+              label: "Les formulations polies de demande"
+            }
+          ]
+        }
+      ]
+    },
     {
       id: "program-a2-b1",
       label: "A2-B1",
@@ -473,6 +857,8 @@ export const sampleProgressionDoc: ProgressionDoc = {
 };
 
 export const sourceImportNotes = [
+  "A0-A1 est traite comme une progression pedagogique pre-A1 -> A1, coherente avec le cadrage CECRL.",
+  "A1-A2 fournit une base editable de consolidation avant les progressions issues des exports.",
   "Les exports fournis ont ete interpretes comme listes ordonnees de themes, non comme calendrier.",
   "Les lignes de jalons calendaires ne sont pas injectees comme themes pedagogiques.",
   "Les objectifs grammaticaux ambigus restent editables et sont signales dans les notes du point concerne."

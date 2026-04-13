@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { sampleProgressionDoc } from "@/data/sample-progressions";
-import { hashProgressionDoc } from "@/lib/progression/document";
+import { hashProgressionDoc, mergeMissingDefaultPrograms } from "@/lib/progression/document";
 import { ProgressionDoc } from "@/lib/types/progression";
 import { validateProgressionDoc } from "@/lib/validators/progression";
 
@@ -53,7 +53,7 @@ export function useProgressionDocument(seed: ProgressionDoc = sampleProgressionD
 
       setHistory({
         past: [],
-        present: validation.data,
+        present: mergeMissingDefaultPrograms(validation.data, seed),
         future: []
       });
       setHasLoadedStorage(true);
@@ -65,7 +65,7 @@ export function useProgressionDocument(seed: ProgressionDoc = sampleProgressionD
       );
       setHasLoadedStorage(true);
     }
-  }, []);
+  }, [seed]);
 
   useEffect(() => {
     if (!hasLoadedStorage) {

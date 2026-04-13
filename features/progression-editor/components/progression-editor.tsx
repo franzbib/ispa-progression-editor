@@ -39,6 +39,7 @@ import {
 import { GrammarPoint, ImportReport, Program, Theme } from "@/lib/types/progression";
 import { useProgressionDocument } from "../hooks/use-progression-document";
 import { findGrammarLocation, parseDragId, themeDragId } from "../lib/drag-ids";
+import { SimpleProgramView } from "./simple-program-view";
 import { ThemeCard } from "./theme-card";
 import { EmptyState, ImportReportBox, NoticeTone, Panel, StatusPill, noticeClass } from "./ui-parts";
 
@@ -66,6 +67,7 @@ export function ProgressionEditor() {
   const [assistText, setAssistText] = useState("");
   const [notice, setNotice] = useState<Notice | null>(null);
   const [importReport, setImportReport] = useState<ImportReport | null>(null);
+  const [simpleProgramId, setSimpleProgramId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -113,6 +115,9 @@ export function ProgressionEditor() {
   const selectedThemeForBank =
     currentProgram?.sequence.find((theme) => theme.id === activeThemeId) ??
     currentProgram?.sequence[0];
+  const simpleProgram = simpleProgramId
+    ? doc.programs.find((program) => program.id === simpleProgramId)
+    : null;
 
   function commitCurrentProgram(nextProgram: Program) {
     if (!currentProgram) {
@@ -367,6 +372,16 @@ export function ProgressionEditor() {
     return <p>Aucun programme disponible.</p>;
   }
 
+  if (simpleProgram) {
+    return (
+      <SimpleProgramView
+        program={simpleProgram}
+        onBack={() => setSimpleProgramId(null)}
+        onPrint={() => window.print()}
+      />
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#f7f8f5] text-[#20231f]">
       <section className="border-b border-[#d9ddd2] bg-[#fbfcf8]">
@@ -410,6 +425,7 @@ export function ProgressionEditor() {
               setActiveProgramId(program.id);
               setActiveThemeId(program.sequence[0]?.id ?? "");
             }}
+            onOpenSimple={(program) => setSimpleProgramId(program.id)}
           />
           <ActionPanel
             canUndo={canUndo}
@@ -535,29 +551,42 @@ export function ProgressionEditor() {
 function ProgramPanel({
   programs,
   currentProgram,
-  onSelect
+  onSelect,
+  onOpenSimple
 }: {
   programs: Program[];
   currentProgram: Program;
   onSelect: (program: Program) => void;
+  onOpenSimple: (program: Program) => void;
 }) {
   return (
     <Panel title="Programmes">
       <div className="space-y-2">
         {programs.map((program) => (
-          <button
+          <div
             key={program.id}
-            className={`w-full rounded-md border px-3 py-2 text-left text-sm transition ${
+            className={`rounded-md border p-2 transition ${
               program.id === currentProgram.id
                 ? "border-[#2c6b57] bg-[#e6f3ec] text-[#193c31]"
                 : "border-[#d9ddd2] bg-white hover:border-[#76a58f]"
             }`}
-            type="button"
-            onClick={() => onSelect(program)}
           >
-            <span className="block font-semibold">{program.label}</span>
-            <span className="text-xs text-[#697267]">{program.sequence.length} thèmes</span>
-          </button>
+            <button
+              className="w-full rounded-md px-1 py-1 text-left text-sm"
+              type="button"
+              onClick={() => onSelect(program)}
+            >
+              <span className="block font-semibold">{program.label}</span>
+              <span className="text-xs text-[#697267]">{program.sequence.length} thèmes</span>
+            </button>
+            <button
+              className="mt-2 w-full rounded-md border border-[#cbd3c4] bg-white px-2 py-1 text-xs font-semibold text-[#26352d] hover:border-[#2c6b57]"
+              type="button"
+              onClick={() => onOpenSimple(program)}
+            >
+              Vue simple
+            </button>
+          </div>
         ))}
       </div>
     </Panel>

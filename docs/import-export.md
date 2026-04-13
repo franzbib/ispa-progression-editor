@@ -42,4 +42,4 @@ Le Markdown est destine a la lecture humaine, a l'archivage et aux revues pedago
 
 ### Impression / PDF
 
-Le bouton "Vue imprimable / PDF" appelle l'impression navigateur. Sur Vercel comme en local, l'utilisateur peut choisir "Enregistrer en PDF".
+Le bouton "Vue imprimable / PDF" appelle l'impression navigateur depuis l'editeur complet. La colonne de gauche propose aussi une "Vue simple" par programme: elle part de l'etat courant restaure depuis `localStorage` et n'affiche que le programme, ses themes et ses points de grammaire. Sur Vercel comme en local, l'utilisateur peut choisir "Enregistrer en PDF".

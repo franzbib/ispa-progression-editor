@@ -1,4 +1,4 @@
-import { ProgressionDoc } from "@/lib/types/progression";
+import { Program, ProgressionDoc } from "@/lib/types/progression";
 
 export function withExportMetadata(doc: ProgressionDoc): ProgressionDoc {
   return {
@@ -22,4 +22,21 @@ export function replaceProgramInDoc(doc: ProgressionDoc, programId: string, prog
 
 export function hashProgressionDoc(doc: ProgressionDoc): string {
   return JSON.stringify(doc);
+}
+
+export function mergeMissingDefaultPrograms(
+  doc: ProgressionDoc,
+  defaults: ProgressionDoc
+): ProgressionDoc {
+  const existingById = new Map(doc.programs.map((program) => [program.id, program]));
+  const defaultIds = new Set(defaults.programs.map((program) => program.id));
+  const programs: Program[] = [
+    ...defaults.programs.map((program) => existingById.get(program.id) ?? program),
+    ...doc.programs.filter((program) => !defaultIds.has(program.id))
+  ];
+
+  return {
+    ...doc,
+    programs
+  };
 }
